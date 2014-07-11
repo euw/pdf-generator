@@ -1,6 +1,5 @@
 <?php namespace Euw\PdfGenerator\Generators;
 
-use Euw\PdfGenerator\Layouts\PDFLayoutInterface;
 use Euw\PdfGenerator\Renderers\PDFRendererInterface;
 
 class PDFGenerator implements PDFGeneratorInterface {
@@ -15,18 +14,23 @@ class PDFGenerator implements PDFGeneratorInterface {
         $this->renderer = $renderer;
     }
 
-    public function show(PDFLayoutInterface $layout, $content)
+    public function show($layout)
     {
-        $this->renderer->render($layout, $content)->show();
+        $this->renderer->render($layout)->show();
     }
 
-    public function download(PDFLayoutInterface $layout, $content)
+    public function download($layout, $fileName)
     {
-        $this->renderer->render($layout, $content)->download();
+        $this->renderer->render($layout)->download($fileName);
     }
 
-    public function attachment(PDFLayoutInterface $layout, $content)
+    public function attachment($layout)
     {
-        $this->renderer->render($layout, $content)->attachment();
+        $this->renderer->render($layout)->attachment();
+    }
+
+    public function saveToFile($layout, $fileName)
+    {
+        $this->renderer->render($layout)->saveToFile($fileName);
     }
 }

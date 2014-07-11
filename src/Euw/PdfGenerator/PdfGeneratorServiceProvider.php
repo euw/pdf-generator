@@ -3,7 +3,7 @@
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 
-class PdfGeneratorServiceProvider extends ServiceProvider {
+class PDFGeneratorServiceProvider extends ServiceProvider {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -25,7 +25,7 @@ class PdfGeneratorServiceProvider extends ServiceProvider {
 
     public function boot()
     {
-        AliasLoader::getInstance()->alias('PDF', 'Euw\PdfGenerator\Facades\PDF');
+        AliasLoader::getInstance()->alias('PDFGenerator', 'Euw\PdfGenerator\Facades\PDFGenerator');
     }
 
 	/**

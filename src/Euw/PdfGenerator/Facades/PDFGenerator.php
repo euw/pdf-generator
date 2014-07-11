@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Facade;
 
-class PDF extends Facade {
+class PDFGenerator extends Facade {
 
     public static function getFacadeAccessor()
     {

@@ -1,8 +1,9 @@
 <?php namespace Euw\PdfGenerator\Renderers;
 
 interface PDFRendererInterface {
-    public function render($format, $content);
+    public function render($layout);
     public function show();
-    public function download();
+    public function download($fileName);
     public function attachment();
+    public function saveToFile($fileName);
 }
