@@ -14,23 +14,28 @@ class PDFGenerator implements PDFGeneratorInterface {
         $this->renderer = $renderer;
     }
 
+    public function render($layout)
+    {
+        return $this->renderer->render($layout);
+    }
+
     public function show($layout)
     {
-        $this->renderer->render($layout)->show();
+        return $this->render($layout)->show();
     }
 
     public function download($layout, $fileName)
     {
-        $this->renderer->render($layout)->download($fileName);
+        return $this->render($layout)->download($fileName);
     }
 
     public function attachment($layout)
     {
-        $this->renderer->render($layout)->attachment();
+        return $this->render($layout)->attachment();
     }
 
     public function saveToFile($layout, $fileName)
     {
-        $this->renderer->render($layout)->saveToFile($fileName);
+        return $this->render($layout)->saveToFile($fileName);
     }
 }
