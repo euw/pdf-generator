@@ -19,9 +19,10 @@ class TCPDFRenderer implements PDFRendererInterface {
         date_default_timezone_set("Europe/Berlin");
     }
 
-    public function render($layout)
+    public function render($layout, $contents = [])
     {
         $this->layout = $layout;
+        $this->contents = $contents;
 
         if ($this->cropMarks) {
             $this->margin = $this->layout->margin;
@@ -110,7 +111,7 @@ class TCPDFRenderer implements PDFRendererInterface {
             }
         }
 
-        foreach ($this->layout->contents as $content) {
+        foreach ($this->contents as $content) {
 
             $text = $content->content;
 
@@ -255,8 +256,6 @@ class TCPDFRenderer implements PDFRendererInterface {
         File::exists($path) or File::makeDirectory($path, 755, true);
 
         $this->pdf->Output($path . $fileName, 'F');
-
-        return $fileName;
     }
 
     public function setTargetId($id)
