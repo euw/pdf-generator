@@ -6,4 +6,6 @@ interface PDFRendererInterface {
     public function download($fileName);
     public function attachment();
     public function saveToFile($fileName);
+
+    public function setTargetId($id);
 }

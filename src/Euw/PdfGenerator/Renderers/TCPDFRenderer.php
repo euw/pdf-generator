@@ -11,6 +11,7 @@ class TCPDFRenderer implements PDFRendererInterface {
     private $margin = 0;
     private $bleed = 0;
     public $cropMarks = true;
+    private $targetId;
 
     public function __construct(TCPDF $pdf)
     {
@@ -59,15 +60,25 @@ class TCPDFRenderer implements PDFRendererInterface {
         $format = $this->layout->width > $this->layout->height ? 'L' : 'P';
 
         $page_format = [
-            'MediaBox' => array('llx' => 0, 'lly' => 0, 'urx' => $this->layout->width + 2 * $this->margin, 'ury' => $this->layout->height + 2 * $this->margin),
-            'CropBox'  => array('llx' => 0, 'lly' => 0, 'urx' => $this->layout->width + 2 * $this->margin, 'ury' => $this->layout->height + 2 * $this->margin),
-            'BleedBox' => array('llx' => $this->margin - $this->bleed, 'lly' => $this->margin - $this->bleed, 'urx' => $this->layout->width + $this->margin + $this->bleed, 'ury' => $this->layout->height + $this->margin + $this->bleed),
-            'TrimBox'  => array('llx' => $this->margin, 'lly' => $this->margin, 'urx' => $this->layout->width + $this->margin, 'ury' => $this->layout->height + $this->margin),
+            'MediaBox' => array('llx' => 0,
+                                'lly' => 0,
+                                'urx' => $this->layout->width + 2 * $this->margin,
+                                'ury' => $this->layout->height + 2 * $this->margin),
+            'CropBox'  => array('llx' => 0,
+                                'lly' => 0,
+                                'urx' => $this->layout->width + 2 * $this->margin,
+                                'ury' => $this->layout->height + 2 * $this->margin),
+            'BleedBox' => array('llx' => $this->margin - $this->bleed,
+                                'lly' => $this->margin - $this->bleed,
+                                'urx' => $this->layout->width + $this->margin + $this->bleed,
+                                'ury' => $this->layout->height + $this->margin + $this->bleed),
+            'TrimBox'  => array('llx' => $this->margin,
+                                'lly' => $this->margin,
+                                'urx' => $this->layout->width + $this->margin,
+                                'ury' => $this->layout->height + $this->margin),
         ];
 
         $this->pdf->AddPage($format, $page_format);
-
-
     }
 
     private function writeTextContent()
@@ -99,8 +110,19 @@ class TCPDFRenderer implements PDFRendererInterface {
             }
         }
 
-
         foreach ($this->layout->contents as $content) {
+
+            $text = $content->content;
+
+            $requirement = $content->requirement();
+
+            if ($requirement && $this->targetId) {
+                $configurationValue = $requirement->configurationForTarget($this->targetId);
+                if ($configurationValue) {
+                    $text = $configurationValue->value;
+                }
+            }
+
             $contentLayouts = $content->layouts()->where('layout_id', '=', $this->layout->id)->get();
 
             foreach ($contentLayouts as $contentLayout) {
@@ -116,7 +138,7 @@ class TCPDFRenderer implements PDFRendererInterface {
                 $this->pdf->MultiCell(
                     $w = (float)$contentLayout->width,
                     $h = (float)$contentLayout->height,
-                    $txt = $content->content,
+                    $txt = $text,
                     $border = 0,
                     $align = 'L',
                     $fill = false,
@@ -132,6 +154,7 @@ class TCPDFRenderer implements PDFRendererInterface {
                     $fitcell = false
                 );
             }
+
         }
     }
 
@@ -234,5 +257,10 @@ class TCPDFRenderer implements PDFRendererInterface {
         $this->pdf->Output($path . $fileName, 'F');
 
         return $fileName;
+    }
+
+    public function setTargetId($id)
+    {
+        $this->targetId = $id;
     }
 }

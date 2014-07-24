@@ -38,4 +38,9 @@ class PDFGenerator implements PDFGeneratorInterface {
     {
         return $this->render($layout)->saveToFile($fileName);
     }
+
+    public function setTargetId($id)
+    {
+        $this->renderer->setTargetId($id);
+    }
 }
