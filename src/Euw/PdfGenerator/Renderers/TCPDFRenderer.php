@@ -113,49 +113,91 @@ class TCPDFRenderer implements PDFRendererInterface {
 
         foreach ($this->contents as $content) {
 
-            $text = $content->content;
+            if ($content->type == 'image') {
+                // Todo: draw image instead of filling with text
+                $requirement = $content->requirement();
 
-            $requirement = $content->requirement();
+                if ($requirement && $this->targetId) {
+                    $configurationValue = $requirement->configurationForTarget($this->targetId);
+                    if ($configurationValue) {
+                        $image = public_path() . \Config::get('paths.campaigns.components.print') . $configurationValue->value;
 
-            if ($requirement && $this->targetId) {
-                $configurationValue = $requirement->configurationForTarget($this->targetId);
-                if ($configurationValue) {
-                    $text = $configurationValue->value;
+                        if (File::exists($image)) {
+
+                            $contentLayouts = $content->layouts()->where('layout_id', '=', $this->layout->id)->get();
+
+                            foreach ($contentLayouts as $contentLayout) {
+                                $this->pdf->Image(
+                                    $image,
+                                    $x = (float)$contentLayout->x + $this->margin,
+                                    $y = (float)$contentLayout->y + $this->margin,
+                                    $w = (float)$contentLayout->width,
+                                    $h = (float)$contentLayout->height,
+                                    $type = '',
+                                    $link = '',
+                                    $align = 'M',
+                                    $resize = false,
+                                    $dpi = 300,
+                                    $palign = 'C',
+                                    $ismask = false,
+                                    $imgmask = false,
+                                    $border = 0,
+                                    $fitbox = false,
+                                    $hidden = false,
+                                    $fitonpage = false,
+                                    $alt = false,
+                                    $altimgs = array());
+                            }
+
+                        }
+                    }
+                }
+
+            } else {
+
+                $text = $content->content;
+
+                $requirement = $content->requirement();
+
+                if ($requirement && $this->targetId) {
+                    $configurationValue = $requirement->configurationForTarget($this->targetId);
+                    if ($configurationValue) {
+                        $text = $configurationValue->value;
+                    }
+                }
+
+                $contentLayouts = $content->layouts()->where('layout_id', '=', $this->layout->id)->get();
+
+                foreach ($contentLayouts as $contentLayout) {
+                    $colorString = $contentLayout->color ?: '0,0,0,100';
+                    $colors = explode(',', $colorString);
+
+                    $fontFamily = $contentLayout->fontFamily ?: 'Helvetica';
+                    $fontFamily = $fontName;
+                    $fontSize = (float)$contentLayout->fontSize > 0 ? (float)$contentLayout->fontSize : 12.0;
+
+                    $this->pdf->SetTextColor($colors[0], $colors[1], $colors[2], $colors[3]);
+                    $this->pdf->SetFont($fontFamily, '', $fontSize);
+                    $this->pdf->MultiCell(
+                        $w = (float)$contentLayout->width,
+                        $h = (float)$contentLayout->height,
+                        $txt = $text,
+                        $border = 0,
+                        $align = 'L',
+                        $fill = false,
+                        $ln = 1,
+                        $x = (float)$contentLayout->x + $this->margin,
+                        $y = (float)$contentLayout->y + $this->margin,
+                        $reseth = true,
+                        $stretch = 0,
+                        $ishtml = false,
+                        $autopadding = true,
+                        $maxh = 0,
+                        $valign = 'T',
+                        $fitcell = false
+                    );
                 }
             }
-
-            $contentLayouts = $content->layouts()->where('layout_id', '=', $this->layout->id)->get();
-
-            foreach ($contentLayouts as $contentLayout) {
-                $colorString = $contentLayout->color ?: '0,0,0,100';
-                $colors = explode(',', $colorString);
-
-                $fontFamily = $contentLayout->fontFamily ?: 'Helvetica';
-                $fontFamily = $fontName;
-                $fontSize = (float)$contentLayout->fontSize > 0 ? (float)$contentLayout->fontSize : 12.0;
-
-                $this->pdf->SetTextColor($colors[0], $colors[1], $colors[2], $colors[3]);
-                $this->pdf->SetFont($fontFamily, '', $fontSize);
-                $this->pdf->MultiCell(
-                    $w = (float)$contentLayout->width,
-                    $h = (float)$contentLayout->height,
-                    $txt = $text,
-                    $border = 0,
-                    $align = 'L',
-                    $fill = false,
-                    $ln = 1,
-                    $x = (float)$contentLayout->x + $this->margin,
-                    $y = (float)$contentLayout->y + $this->margin,
-                    $reseth = true,
-                    $stretch = 0,
-                    $ishtml = false,
-                    $autopadding = true,
-                    $maxh = 0,
-                    $valign = 'T',
-                    $fitcell = false
-                );
-            }
-
         }
     }
 
