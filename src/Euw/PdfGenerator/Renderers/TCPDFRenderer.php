@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\File;
 use TCPDF;
 use TCPDF_FONTS;
 
-class TCPDFRenderer implements PDFRendererInterface {
+class TCPDFRenderer implements PDFRendererInterface
+{
 
     private $pdf;
     private $layout;
@@ -12,6 +13,7 @@ class TCPDFRenderer implements PDFRendererInterface {
     private $bleed = 0;
     public $cropMarks = true;
     private $targetId;
+    private $debug = 0;
 
     public function __construct(TCPDF $pdf)
     {
@@ -48,7 +50,7 @@ class TCPDFRenderer implements PDFRendererInterface {
         $this->pdf->SetAutoPageBreak(false);
 
         // margins
-        $this->pdf->setMargins(0,0,0);
+        $this->pdf->setMargins(0, 0, 0);
         $this->pdf->SetHeaderMargin(0);
         $this->pdf->SetTopMargin(0);
         $this->pdf->SetFooterMargin(0);
@@ -113,20 +115,22 @@ class TCPDFRenderer implements PDFRendererInterface {
 
         foreach ($this->contents as $content) {
 
+            $requirement = $content->requirement;
+
             if ($content->type == 'image') {
-                // Todo: draw image instead of filling with text
-                $requirement = $content->requirement();
 
                 if ($requirement && $this->targetId) {
+
                     $configurationValue = $requirement->configurationForTarget($this->targetId);
                     if ($configurationValue) {
-                        $image = public_path() . \Config::get('paths.campaigns.components.print') . $configurationValue->value;
+                        $image = public_path() . \Config::get('paths.campaigns.images') . $configurationValue->value;
 
                         if (File::exists($image)) {
 
                             $contentLayouts = $content->layouts()->where('layout_id', '=', $this->layout->id)->get();
 
                             foreach ($contentLayouts as $contentLayout) {
+
                                 $this->pdf->Image(
                                     $image,
                                     $x = (float)$contentLayout->x + $this->margin,
@@ -135,13 +139,13 @@ class TCPDFRenderer implements PDFRendererInterface {
                                     $h = (float)$contentLayout->height,
                                     $type = '',
                                     $link = '',
-                                    $align = 'M',
+                                    $align = 'L',
                                     $resize = false,
                                     $dpi = 300,
-                                    $palign = 'C',
+                                    $palign = 'T',
                                     $ismask = false,
                                     $imgmask = false,
-                                    $border = 0,
+                                    $border = $this->debug,
                                     $fitbox = false,
                                     $hidden = false,
                                     $fitonpage = false,
@@ -156,8 +160,6 @@ class TCPDFRenderer implements PDFRendererInterface {
             } else {
 
                 $text = $content->content;
-
-                $requirement = $content->requirement();
 
                 if ($requirement && $this->targetId) {
                     $configurationValue = $requirement->configurationForTarget($this->targetId);
@@ -182,7 +184,7 @@ class TCPDFRenderer implements PDFRendererInterface {
                         $w = (float)$contentLayout->width,
                         $h = (float)$contentLayout->height,
                         $txt = $text,
-                        $border = 0,
+                        $border = $this->debug,
                         $align = 'L',
                         $fill = false,
                         $ln = 1,
@@ -260,7 +262,8 @@ class TCPDFRenderer implements PDFRendererInterface {
      * Options: I = display inline, F = output as file, D = download
      */
 
-    private function getFileName() {
+    private function getFileName()
+    {
         $time = time();
         return $time . '.pdf';
     }
